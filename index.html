@@ -1,0 +1,53 @@
+
+<!doctype html>
+<html class="no-js" lang="en" manifest="test.manifest">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test site OFFLine</title>
+    <link rel="stylesheet" href="assets/css/app.css">
+  </head>
+  <body>
+
+    <h1>TEST <hr></h1>
+    <div id="input_form">
+    
+    <!-- Форма проверяется перед отправкой функцией proove на наличие интренета , и если он есть, то запускается файл log.php
+    в котором обновляется информация, после чего переход на страницу work.html для дальнейшей работы с формами и проверки логинов и паролей. Если интренета нет, то в форме меняется атрибут  action для перехода на страницу work.html без обновления и работа происходит с охраненными в кэше данными -->
+    	<form id="input_form_action" action="log.php" method="post" onsubmit="proove(this);"> 
+     	<p>Введите логин: 
+     		<input type="text" name="log" size="10" maxlength="10"><br /> 
+     	</p> 
+     	<p>Введите пароль: 
+     		<input type="text" name="pas" size="10" maxlength="10"> 
+     	</p> 
+     	<input id="input_form_subm" type="submit" name="submit" value="Send">
+     </form>
+    </div>
+    
+    <script type="text/javascript">
+    function proove(elem){if(!navigator.onLine){elem.setAttribute('action','work.html')}}
+    
+    var status=navigator.onLine,
+    	input_form=document.getElementById('input_form');
+    
+    var xhr=new XMLHttpRequest();
+    xhr.onreadystatechange=function(){
+    	if (xhr.readyState===4){input_form.innerHTML+='доступ к файлу results.json получен';}
+    }
+    
+    xhr.open('GET','/results.json');
+    xhr.send();
+    
+    if(status){
+    	input_form.innerHTML+='Наличие интернета: '+status+'<br />'}
+    	else{
+    	input_form.innerHTML+='Наличие интернета: '+status+'<br />'
+    	}
+    </script>
+    
+
+    <script src="assets/js/app.js"></script>
+  </body>
+</html>

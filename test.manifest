@@ -1,0 +1,14 @@
+CACHE MANIFEST
+
+CACHE:
+work.html
+offline.html
+results.json
+
+
+FALLBACK:
+/ /offline.html
+
+
+NETWORK:
+*
