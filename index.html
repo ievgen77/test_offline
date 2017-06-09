@@ -10,41 +10,98 @@
   </head>
   <body>
 
-    <h1>TEST <hr></h1>
+    <h1 id='tite'>TEST</h1>
+    
     <div id="input_form">
     
-    <!-- Форма проверяется перед отправкой функцией proove на наличие интренета , и если он есть, то запускается файл log.php
-    в котором обновляется информация, после чего переход на страницу work.html для дальнейшей работы с формами и проверки логинов и паролей. Если интренета нет, то в форме меняется атрибут  action для перехода на страницу work.html без обновления и работа происходит с охраненными в кэше данными -->
-    	<form id="input_form_action" action="log.php" method="post" onsubmit="proove(this);"> 
+    <!-- по событию онклик, привязанному к кнопке Send запускается сценарий идентификации пользователя proove() -->
+    	<hr>
      	<p>Введите логин: 
-     		<input type="text" name="log" size="10" maxlength="10"><br /> 
+     		<input type="text" name="log" id='input_form__log' size="10" maxlength="10" value="login"><br /> 
      	</p> 
      	<p>Введите пароль: 
-     		<input type="text" name="pas" size="10" maxlength="10"> 
+     		<input type="text" name="pas" id='input_form__pas' size="10" maxlength="10" value="pass"> 
      	</p> 
-     	<input id="input_form_subm" type="submit" name="submit" value="Send">
-     </form>
+     	<input id="input_form_subm" type="submit" name="submit" value="Send" onclick="proove()">
+    
     </div>
+    <div id="show_login"></div>
+    <div id="status_internet"></div>
+    
     
     <script type="text/javascript">
-    function proove(elem){if(!navigator.onLine){elem.setAttribute('action','work.html')}}
     
-    var status=navigator.onLine,
-    	input_form=document.getElementById('input_form');
-    
-    var xhr=new XMLHttpRequest();
-    xhr.onreadystatechange=function(){
-    	if (xhr.readyState===4){input_form.innerHTML+='доступ к файлу results.json получен';}
+    function check_login(log,pas){ /*возвращает TRUE при успешной идентификации пользователя*/
+    	var find_=false;
+    	show_login.innerHTML='Логин: '+log+'<br />'
+    	show_login.innerHTML+='Пароль: '+pas+'<br />'
+    	for(var k in rezult) {
+    		if ((rezult[k].login==log)&&(rezult[k].pass==pas)){
+    			show_login.innerHTML+='введенные логин и пароль соответствуют пользователю : '+rezult[k].name+'<br />';
+    			find_=true;
+    			return find_; 
+    		}
+    	}
+    	if(!find_){show_login.innerHTML+='Нет пользователя с таким логином или неверно введен пароль'};
+    	return find_;
     }
     
+    function recive_kod(){ /*функция получения кода после успешной авторизации*/
+    var script = document.createElement('script');
+    script.src = "js.js";
+    
+    script.onreadystatechange = function() {show_login.innerHTML+='скрипт js.js подгружен: '+this.readyState+'<br />'}
+    document.documentElement.appendChild(script);
+    }
+    
+    
+    function refreshData(){ /*обновляем данные локального хранилища*/
+    tite.innerHTML='TEST       обновление данных';
+    /*тут выполняем скрипт log.php*/
+    tite.innerHTML='TEST';
+    }
+    
+    function proove(elem){ /*конвертирует файл results.json в объект*/ 
+    
+    if (xhr.readyState===4){
+    		rezult=JSON.parse(xhr.responseText);
+    		if(check_login(input_form__log.value,input_form__pas.value)){recive_kod()}
+    		}else{alert('не получен доступ к results.json')}
+    }
+    
+    
+    function connect_show(status){ /*выводит сообщение о наличии интернет*/
+    	if(status){
+    	status_internet.innerHTML='Наличие интернета: '+status+'<br />';
+    	status_internet.style.backgroundColor = 'green';
+    	}
+    	else{
+    	status_internet.innerHTML='Наличие интернета: '+status+'<br />';
+    	status_internet.style.backgroundColor = 'red';
+    	}
+    }
+    
+    /*инициализация сообщения о наличии интернет*/
+    status_internet.innerHTML='Наличие интернета: '+navigator.onLine+'<br />';
+    status_internet.style.backgroundColor = navigator.onLine?'green':'red';
+    status_internet.style.color = 'white';
+    
+    var input_form=document.getElementById('input_form'),
+    	rezult={};
+    
+    /*открываем запрос АЯКСа*/
+    var xhr=new XMLHttpRequest();
+    /*xhr.onreadystatechange=function(){}*/
     xhr.open('GET','/results.json');
     xhr.send();
     
-    if(status){
-    	input_form.innerHTML+='Наличие интернета: '+status+'<br />'}
-    	else{
-    	input_form.innerHTML+='Наличие интернета: '+status+'<br />'
-    	}
+    var timerId = setInterval(function() {refreshData()}, 10000);
+    if(!navigator.onLine){clearInterval(timerId)}
+    
+     /*проверка коннекта*/
+    window.ononline = function(){timerId=setInterval(function() {refreshData()}, 10000);connect_show(navigator.onLine)}
+    window.onoffline = function(){clearInterval(timerId);connect_show(navigator.onLine)}
+    
     </script>
     
 

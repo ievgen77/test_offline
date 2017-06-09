@@ -4,7 +4,7 @@ CACHE:
 work.html
 offline.html
 results.json
-js.js
+
 
 FALLBACK:
 / /offline.html
